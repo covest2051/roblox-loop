@@ -1,0 +1,69 @@
+{
+	"name": "Loop",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"Shared": {
+				"$path": "src/shared"
+			},
+			"Remotes": {
+				"$className": "Folder",
+				"ClientAction": {
+					"$className": "RemoteEvent"
+				},
+				"ServerEvent": {
+					"$className": "RemoteEvent"
+				}
+			}
+		},
+		"ServerScriptService": {
+			"Server": {
+				"$path": "src/server"
+			}
+		},
+		"StarterPlayer": {
+			"$properties": {
+				"CameraMaxZoomDistance": 90,
+				"CameraMinZoomDistance": 10,
+				"CharacterWalkSpeed": 16,
+				"CharacterJumpHeight": 0,
+				"CharacterUseJumpPower": false
+			},
+			"StarterPlayerScripts": {
+				"Client": {
+					"$path": "src/client"
+				}
+			}
+		},
+		"Lighting": {
+			"$properties": {
+				"ClockTime": 19.6,
+				"Brightness": 1.6,
+				"GlobalShadows": true,
+				"Ambient": [90, 96, 130],
+				"OutdoorAmbient": [110, 116, 150],
+				"FogColor": [18, 20, 40],
+				"FogStart": 160,
+				"FogEnd": 420,
+				"EnvironmentDiffuseScale": 0.5,
+				"EnvironmentSpecularScale": 0.6
+			}
+		},
+		"Workspace": {
+			"$properties": {
+				"Gravity": 196.2,
+				"StreamingEnabled": false
+			}
+		},
+		"SoundService": {
+			"$properties": {
+				"RespectFilteringEnabled": true
+			}
+		},
+		"Players": {
+			"$properties": {
+				"CharacterAutoLoads": false
+			}
+		}
+	}
+}
