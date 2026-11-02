@@ -904,6 +904,19 @@ function LoopService.debug(player: Player, cmd: string, arg: any): string?
 			LoopService.restart(player)
 		end
 		return "autoplay " .. tostring(run.autoplay)
+	elseif cmd == "state" then
+		return string.format(
+			"level %d k=%d phase=%s step=%s loop=%s/%s ghosts=%d extra=%d players=%d",
+			run.n,
+			run.lv.k,
+			run.phase,
+			tostring(run.st and run.st.step),
+			tostring(run.loopNo),
+			tostring(run.total),
+			#run.ghosts,
+			run.extra,
+			#run.members
+		)
 	elseif cmd == "unlockall" then
 		local d = Data.get(player)
 		if d then

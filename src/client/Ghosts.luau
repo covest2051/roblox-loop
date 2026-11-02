@@ -292,8 +292,10 @@ end
 -------------------------------------------------------------------------------
 -- Уровень и петля
 -------------------------------------------------------------------------------
-function Ghosts.setLevel(n: number, origin: { number })
+function Ghosts.setLevel(n: number, origin: { number }, runId: number?)
 	clear()
+	state.run = runId
+	state.gem = nil
 	state.lv = Campaign.level(n)
 	state.n = n
 	state.origin = Vector3.new(origin[1], origin[2], origin[3])
@@ -741,6 +743,22 @@ function Ghosts.update(dt: number)
 		d.gui.Text.Text = text
 		d.gui.Enabled = text ~= ""
 		_ = id
+	end
+	-- кристалл сокровища вращается (локально, сервер его не двигает)
+	if not state.gem and state.run then
+		local levels = Workspace:FindFirstChild("Levels")
+		local m = levels and levels:FindFirstChild("Run_" .. state.run)
+		local tr = m and m:FindFirstChild("Treasure")
+		local gem = tr and tr:FindFirstChild("Gem") :: BasePart?
+		if gem then
+			state.gem = { part = gem, cf = gem.CFrame }
+		end
+	end
+	if state.gem and state.gem.part.Parent then
+		local up = math.sin(t * 2) * 0.3
+		state.gem.part.CFrame = CFrame.new(state.gem.cf.Position + Vector3.new(0, up, 0))
+			* CFrame.Angles(0, t * 1.2, 0)
+			* CFrame.Angles(math.rad(45), 0, math.rad(45))
 	end
 	-- подсказка
 	if state.hint and state.phase == "play" then

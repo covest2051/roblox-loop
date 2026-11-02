@@ -530,6 +530,12 @@ check(
 )
 check(last(alice, "won").loops == Campaign.level(9).k, "in exactly k loops")
 action(alice, { t = "debug", cmd = "autoplay" })
+action(alice, { t = "debug", cmd = "state" })
+local stateMsg = last(alice, "toast")
+check(
+	stateMsg and stateMsg.vars and string.find(stateMsg.vars.text, "k=", 1, true) ~= nil,
+	"debug state: " .. tostring(stateMsg and stateMsg.vars and stateMsg.vars.text)
+)
 
 print("== selftest")
 action(alice, { t = "debug", cmd = "selftest" })

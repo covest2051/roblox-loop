@@ -220,8 +220,8 @@ function Actions.start()
 		budget[p] = nil
 	end)
 	-- Studio: команды из Command Bar / Studio MCP (execute_luau) без require:
-	--   workspace:SetAttribute("DebugCommand", "autoplay")  -- autoplay | win | next | prev | level 7 |
-	--     out | undo | restart | unlockall | coins | reset | selftest
+	--   workspace:SetAttribute("DebugCommand", "autoplay")  -- autoplay | state | win | next | prev |
+	--     level 7 | out | undo | restart | unlockall | coins | reset | selftest
 	if RunService:IsStudio() then
 		Workspace:GetAttributeChangedSignal("DebugCommand"):Connect(function()
 			local raw = Workspace:GetAttribute("DebugCommand")

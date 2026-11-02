@@ -129,7 +129,7 @@ handlers.toast = function(p)
 end
 
 handlers.level = function(p)
-	Ghosts.setLevel(p.n, p.origin)
+	Ghosts.setLevel(p.n, p.origin, p.run)
 	Hud.setLevel(p)
 end
 
