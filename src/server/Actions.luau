@@ -45,6 +45,11 @@ handlers.profile = function(player: Player)
 	Monetization.sendProfile(player)
 end
 
+handlers.sync = function(player: Player)
+	LoopService.sync(player)
+	Monetization.sendProfile(player)
+end
+
 handlers.rewind = function(player: Player)
 	LoopService.finishLive(player)
 end

@@ -295,6 +295,41 @@ local function sendHint(run, player: Player)
 	sendTo(player, { t = "hint", rec = packRec(plan.recs[i]), start = run.loopStart, self = i })
 end
 
+function LoopService.loopPayload(run, spectator: boolean?)
+	local ghosts = {}
+	for _, g in run.ghosts do
+		table.insert(ghosts, packRec(g))
+	end
+	local livesInfo = {}
+	if not spectator then
+		for i, p in run.lives do
+			local x, y = startTile(run, i)
+			table.insert(livesInfo, {
+				userId = p.UserId,
+				name = p.DisplayName,
+				skin = p:GetAttribute("Skin"),
+				trail = p:GetAttribute("Trail"),
+				rewind = p:GetAttribute("Rewind"),
+				x = x,
+				y = y,
+			})
+		end
+	end
+	return {
+		t = "loop",
+		n = run.n,
+		loop = run.loopNo,
+		total = run.total,
+		start = run.loopStart,
+		length = Config.Loop.Length,
+		ghosts = ghosts,
+		lives = livesInfo,
+		k = run.lv.k,
+		extra = run.extra,
+		spectator = spectator == true,
+	}
+end
+
 startLoop = function(run)
 	run.lives = table.clone(run.members)
 	local lives = {}
@@ -310,35 +345,7 @@ startLoop = function(run)
 	run.loopNo = loopIndex(run)
 	run.total = totalLoops(run)
 	LevelBuilder.reset(run.model, run.lv)
-	local ghosts = {}
-	for _, g in run.ghosts do
-		table.insert(ghosts, packRec(g))
-	end
-	local livesInfo = {}
-	for i, p in run.lives do
-		local x, y = startTile(run, i)
-		table.insert(livesInfo, {
-			userId = p.UserId,
-			name = p.DisplayName,
-			skin = p:GetAttribute("Skin"),
-			trail = p:GetAttribute("Trail"),
-			rewind = p:GetAttribute("Rewind"),
-			x = x,
-			y = y,
-		})
-	end
-	send(run, {
-		t = "loop",
-		n = run.n,
-		loop = run.loopNo,
-		total = run.total,
-		start = run.loopStart,
-		length = Config.Loop.Length,
-		ghosts = ghosts,
-		lives = livesInfo,
-		k = run.lv.k,
-		extra = run.extra,
-	})
+	send(run, LoopService.loopPayload(run))
 	for p in run.hint do
 		if p.Parent and table.find(run.lives, p) then
 			sendHint(run, p)
@@ -622,23 +629,7 @@ function LoopService.join(player: Player, run): boolean
 		placeAt(run, player, x, y)
 		freeze(player, true)
 		-- текущая петля: зритель (видит призраков), войдёт со следующей
-		local ghosts = {}
-		for _, g in run.ghosts do
-			table.insert(ghosts, packRec(g))
-		end
-		sendTo(player, {
-			t = "loop",
-			n = run.n,
-			loop = run.loopNo,
-			total = run.total,
-			start = run.loopStart,
-			length = Config.Loop.Length,
-			ghosts = ghosts,
-			lives = {},
-			k = run.lv.k,
-			extra = run.extra,
-			spectator = true,
-		})
+		sendTo(player, LoopService.loopPayload(run, true))
 		toast(player, "ui.waitNext")
 	else
 		table.insert(run.members, player)
@@ -663,6 +654,32 @@ function LoopService.solo(player: Player, n: number)
 	local run = LoopService.create(n)
 	LoopService.join(player, run)
 	return run
+end
+
+-- Клиент запустился: прислать уровень и текущую петлю (события до запуска клиента теряются)
+function LoopService.sync(player: Player)
+	local run = runOf[player]
+	if not run then
+		return
+	end
+	sendTo(player, levelPayload(run))
+	sendTo(player, membersPayload(run))
+	if run.phase == "play" then
+		local live = table.find(run.lives, player) ~= nil
+		sendTo(player, LoopService.loopPayload(run, not live))
+		local b = live and Loop.bodyOf(run.st, player.UserId)
+		if b and b.done then
+			sendTo(player, { t = "done", step = run.st.step })
+		end
+	elseif run.phase == "out" then
+		sendTo(player, {
+			t = "out",
+			deadline = run.phaseEnd,
+			loop = loopIndex(run) - 1,
+			canExtra = Monetization.available("product", "ExtraLoop"),
+			robux = Config.Products.ExtraLoop.robux,
+		})
+	end
 end
 
 function LoopService.runOf(player: Player)
